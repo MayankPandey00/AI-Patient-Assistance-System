@@ -9,3 +9,5 @@ deep-translator==1.11.4
 gTTS==2.5.1
 cryptography==42.0.8
 mysql-connector-python==8.4.0
+standard-aifc
+audioop-lts
