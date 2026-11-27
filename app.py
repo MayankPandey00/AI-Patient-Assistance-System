@@ -165,6 +165,84 @@ LANGUAGE_NAMES = {
     "ml": "Malayalam", "es": "Spanish", "en": "English"
 }
 
+# def translate_medical_text(text: str, src_lang: str, target_lang: str, speaker_role: str = "PATIENT") -> str:
+#     if not text or src_lang == target_lang:
+#         return text
+
+#     src_name = LANGUAGE_NAMES.get(src_lang, src_lang)
+#     target_name = LANGUAGE_NAMES.get(target_lang, target_lang)
+
+#     # -------------------------------------------------------------
+#     # TIER 1: Try your Gemini API Key
+#     # -------------------------------------------------------------
+#     if GENINI_ENABLED:
+#         try:
+#             system_prompt = (
+#                 f"You are an expert hospital medical interpreter translating statements from {src_name} to {target_name}. "
+#                 f"The speaker is a {speaker_role}. Preserve precise clinical accuracy, symptoms, medication dosages, "
+#                 f"and medical terminology. Output ONLY the translated text in {target_name} without conversational filler."
+#             )
+#             response = client.models.generate_content(
+#                 model=GEMINI_MODEL,
+#                 contents=f"{system_prompt}\n\nText to translate: {text}"
+#             )
+#             if response and response.text:
+#                 result = response.text.strip()
+#                 print(f"✅ [Gemini API Translation Success]: {result}")
+#                 return result
+#         except Exception as e:
+#             print(f"⚠️ [Gemini API failed, switching to Fallback 1]: {e}")
+
+#     # -------------------------------------------------------------
+#     # TIER 2: Google GTX Engine (with browser User-Agent header)
+#     # -------------------------------------------------------------
+#     try:
+#         url = "https://translate.googleapis.com/translate_a/single"
+#         headers = {
+#             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+#         }
+#         params = {
+#             "client": "gtx",
+#             "sl": src_lang,
+#             "tl": target_lang,
+#             "dt": "t",
+#             "q": text
+#         }
+#         resp = http_session.get(url, params=params, headers=headers, timeout=5)
+#         if resp.status_code == 200:
+#             data = resp.json()
+#             translated = "".join([segment[0] for segment in data[0] if segment and segment[0]])
+#             if translated:
+#                 print(f"⚡ [GTX Translation Success]: {translated}")
+#                 return translated
+#         else:
+#             print(f"⚠️ [GTX returned status {resp.status_code}]")
+#     except Exception as e:
+#         print(f"⚠️ [GTX Engine failed, switching to Fallback 2]: {e}")
+
+#     # -------------------------------------------------------------
+#     # TIER 3: MyMemory Translation API (Backup)
+#     # -------------------------------------------------------------
+#     try:
+#         url2 = "https://api.mymemory.translated.net/get"
+#         resp2 = http_session.get(
+#             url2,
+#             params={"q": text, "langpair": f"{src_lang}|{target_lang}"},
+#             timeout=5
+#         )
+#         if resp2.status_code == 200:
+#             translated = resp2.json().get("responseData", {}).get("translatedText", "")
+#             if translated and not translated.startswith("MYMEMORY WARNING"):
+#                 print(f"🌐 [MyMemory Translation Success]: {translated}")
+#                 return translated
+#     except Exception as e:
+#         print(f"⚠️ [MyMemory Engine failed]: {e}")
+
+#     # If all tiers fail, return the original text with a warning
+#     print("❌ All translation engines failed. Please check internet connection.")
+#     return text
+
+
 def translate_medical_text(text: str, src_lang: str, target_lang: str, speaker_role: str = "PATIENT") -> str:
     if not text or src_lang == target_lang:
         return text
@@ -173,14 +251,15 @@ def translate_medical_text(text: str, src_lang: str, target_lang: str, speaker_r
     target_name = LANGUAGE_NAMES.get(target_lang, target_lang)
 
     # -------------------------------------------------------------
-    # TIER 1: Try your Gemini API Key
+    # TIER 1: Gemini API
     # -------------------------------------------------------------
     if GENINI_ENABLED:
         try:
             system_prompt = (
-                f"You are an expert hospital medical interpreter translating statements from {src_name} to {target_name}. "
-                f"The speaker is a {speaker_role}. Preserve precise clinical accuracy, symptoms, medication dosages, "
-                f"and medical terminology. Output ONLY the translated text in {target_name} without conversational filler."
+                f"You are an expert hospital medical interpreter translating statements into {target_name}. "
+                f"The speaker is a {speaker_role} (expected source language: {src_name}, including phonetic/romanized text). "
+                f"Preserve precise clinical accuracy, symptoms, medication dosages, and medical terminology. "
+                f"Output ONLY the translated text in {target_name} without conversational filler."
             )
             response = client.models.generate_content(
                 model=GEMINI_MODEL,
@@ -188,13 +267,15 @@ def translate_medical_text(text: str, src_lang: str, target_lang: str, speaker_r
             )
             if response and response.text:
                 result = response.text.strip()
-                print(f"✅ [Gemini API Translation Success]: {result}")
+                print(f"[Gemini Translation Success]: {result}", flush=True)
                 return result
         except Exception as e:
-            print(f"⚠️ [Gemini API failed, switching to Fallback 1]: {e}")
+            print(f"[Gemini API failed]: {e}", flush=True)
+    else:
+        print("[Gemini API skipped]: GEMINI_API_KEY missing or google-genai not installed", flush=True)
 
     # -------------------------------------------------------------
-    # TIER 2: Google GTX Engine (with browser User-Agent header)
+    # TIER 2: Google GTX Engine (auto-detect source language)
     # -------------------------------------------------------------
     try:
         url = "https://translate.googleapis.com/translate_a/single"
@@ -203,22 +284,22 @@ def translate_medical_text(text: str, src_lang: str, target_lang: str, speaker_r
         }
         params = {
             "client": "gtx",
-            "sl": src_lang,
+            "sl": "auto",
             "tl": target_lang,
             "dt": "t",
             "q": text
         }
-        resp = http_session.get(url, params=params, headers=headers, timeout=5)
+        resp = http_session.get(url, params=params, headers=headers, timeout=10)
         if resp.status_code == 200:
             data = resp.json()
             translated = "".join([segment[0] for segment in data[0] if segment and segment[0]])
             if translated:
-                print(f"⚡ [GTX Translation Success]: {translated}")
+                print(f"[GTX Translation Success]: {translated}", flush=True)
                 return translated
         else:
-            print(f"⚠️ [GTX returned status {resp.status_code}]")
+            print(f"[GTX failed]: HTTP {resp.status_code}", flush=True)
     except Exception as e:
-        print(f"⚠️ [GTX Engine failed, switching to Fallback 2]: {e}")
+        print(f"[GTX Engine failed]: {e}", flush=True)
 
     # -------------------------------------------------------------
     # TIER 3: MyMemory Translation API (Backup)
@@ -228,19 +309,20 @@ def translate_medical_text(text: str, src_lang: str, target_lang: str, speaker_r
         resp2 = http_session.get(
             url2,
             params={"q": text, "langpair": f"{src_lang}|{target_lang}"},
-            timeout=5
+            timeout=10
         )
         if resp2.status_code == 200:
             translated = resp2.json().get("responseData", {}).get("translatedText", "")
             if translated and not translated.startswith("MYMEMORY WARNING"):
-                print(f"🌐 [MyMemory Translation Success]: {translated}")
+                print(f"[MyMemory Translation Success]: {translated}", flush=True)
                 return translated
+            print(f"[MyMemory skipped]: {translated}", flush=True)
+        else:
+            print(f"[MyMemory failed]: HTTP {resp2.status_code}", flush=True)
     except Exception as e:
-        print(f"⚠️ [MyMemory Engine failed]: {e}")
+        print(f"[MyMemory Engine failed]: {e}", flush=True)
 
-    # If all tiers fail, return the original text with a warning
-    print("❌ All translation engines failed. Please check internet connection.")
-    return text
+    raise RuntimeError("All translation engines failed. Check Render Logs for Gemini/GTX/MyMemory errors.")
 
 
 # ==============================================================================
@@ -294,8 +376,11 @@ def process_voice_pipeline():
     if not stt_success:
         return jsonify({"success": False, "error": recognized_text}), 400
 
-    # Translated using your Gemini API key with medical prompt engineering
-    translated_text = translate_medical_text(recognized_text, src_lang, target_lang, speaker_role)
+    # --- WRAPPED TRANSLATION CALL ---
+    try:
+        translated_text = translate_medical_text(recognized_text, src_lang, target_lang, speaker_role)
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 502
 
     store_medical_interaction(patient_id, speaker_role, src_lang, target_lang, recognized_text, translated_text)
 
@@ -319,7 +404,12 @@ def process_text_pipeline():
     if not text:
         return jsonify({"success": False, "error": "Please enter or speak a message."}), 400
 
-    translated_text = translate_medical_text(text, src_lang, target_lang, speaker_role)
+    # --- WRAPPED TRANSLATION CALL ---
+    try:
+        translated_text = translate_medical_text(text, src_lang, target_lang, speaker_role)
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 502
+
     store_medical_interaction(patient_id, speaker_role, src_lang, target_lang, text, translated_text)
 
     return jsonify({
