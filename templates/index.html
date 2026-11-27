@@ -21,6 +21,14 @@
                 <span>Patient ID:</span>
                 <input id="patientId" type="text" value="PT-101">
             </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:0.85rem; font-weight:600;">
+                    👤 {{ user_name }}{% if is_guest %} (Guest){% endif %}
+                </span>
+                <a href="{{ url_for('auth.logout') }}" style="padding:6px 12px; background:#ef4444; color:#ffffff; text-decoration:none; border-radius:6px; font-size:0.8rem; font-weight:600;">
+                    {% if is_guest %}Sign In{% else %}Logout{% endif %}
+                </a>
+            </div>
         </div>
     </header>
 

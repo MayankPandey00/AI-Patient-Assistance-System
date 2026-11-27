@@ -324,7 +324,7 @@ def translate_medical_text(text: str, src_lang: str, target_lang: str, speaker_r
 
     raise RuntimeError("All translation engines failed. Check Render Logs for Gemini/GTX/MyMemory errors.")
 
-
+    
 # ==============================================================================
 # MODULE 4: RESPONSE GENERATION MODULE (gTTS)
 # ==============================================================================
