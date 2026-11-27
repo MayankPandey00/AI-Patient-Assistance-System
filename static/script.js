@@ -59,7 +59,7 @@ let isRecording = false;
                 setMicUI(role, true);
 
             } catch (err) {
-                showAlert("Microphone Error: " + err.message + ". Please open http://localhost:5000 and allow microphone permission.", true);
+                showAlert("Microphone Error: " + err.message + ". Please open the site over HTTPS and allow microphone permission.", true);
             }
         }
 
@@ -147,7 +147,7 @@ let isRecording = false;
                     showAlert(data.error, true);
                 }
             } catch (err) {
-                showAlert("Backend connection error: Ensure 'python app.py' is running.", true);
+                showAlert("Server connection error. Please try again in a moment.", true);
             }
         }
 
@@ -218,7 +218,7 @@ let isRecording = false;
                     showAlert(data.error, true);
                 }
             } catch (err) {
-                showAlert("Cannot connect to Flask backend. Ensure 'python app.py' is running.", true);
+                showAlert("Cannot connect to the server. Please try again in a moment.", true);
             }
         }
 

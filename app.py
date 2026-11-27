@@ -131,7 +131,8 @@ def retrieve_patient_history(patient_id: str) -> list:
 # ==============================================================================
 STT_LANGUAGE_CODES = {
     "hi": "hi-IN", "bn": "bn-IN", "ta": "ta-IN", "te": "te-IN",
-    "mr": "mr-IN", "gu": "gu-IN", "pa": "pa-IN", "en": "en-IN"
+    "mr": "mr-IN", "gu": "gu-IN", "pa": "pa-IN", "kn": "kn-IN",
+    "ml": "ml-IN", "en": "en-IN"
 }
 
 def convert_voice_to_text(wav_bytes_io: io.BytesIO, lang_code: str) -> tuple:
@@ -160,7 +161,8 @@ def convert_voice_to_text(wav_bytes_io: io.BytesIO, lang_code: str) -> tuple:
 # ==============================================================================
 LANGUAGE_NAMES = {
     "hi": "Hindi", "bn": "Bengali", "ta": "Tamil", "te": "Telugu",
-    "mr": "Marathi", "gu": "Gujarati", "pa": "Punjabi", "es": "Spanish", "en": "English"
+    "mr": "Marathi", "gu": "Gujarati", "pa": "Punjabi", "kn": "Kannada",
+    "ml": "Malayalam", "es": "Spanish", "en": "English"
 }
 
 def translate_medical_text(text: str, src_lang: str, target_lang: str, speaker_role: str = "PATIENT") -> str:
@@ -245,6 +247,7 @@ def translate_medical_text(text: str, src_lang: str, target_lang: str, speaker_r
 # MODULE 4: RESPONSE GENERATION MODULE (gTTS)
 # ==============================================================================
 @app.route("/api/tts", methods=["GET"])
+@translator_access_required
 def generate_tts_response():
     text = (request.args.get("text") or "").strip()
     lang = (request.args.get("lang") or "en").strip()
@@ -274,6 +277,7 @@ def index():
     return render_template("index.html")
 
 @app.route("/api/voice-pipeline", methods=["POST"])
+@translator_access_required
 def process_voice_pipeline():
     if "audio" not in request.files:
         return jsonify({"success": False, "error": "No voice recording received."}), 400
@@ -303,6 +307,7 @@ def process_voice_pipeline():
     })
 
 @app.route("/api/text-pipeline", methods=["POST"])
+@translator_access_required
 def process_text_pipeline():
     data = request.get_json(silent=True) or {}
     text = (data.get("text") or "").strip()
@@ -325,6 +330,7 @@ def process_text_pipeline():
     })
 
 @app.route("/api/history", methods=["POST"])
+@full_login_required
 def get_history():
     data = request.get_json(silent=True) or {}
     patient_id = data.get("patient_id", "PT-101")
@@ -338,9 +344,10 @@ def get_history():
 
 
 if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
     print("===================================================================")
-    print(f" AI-BASED MULTILINGUAL PATIENT ASSISTANCE SYSTEM")
+    print(" AI-BASED MULTILINGUAL PATIENT ASSISTANCE SYSTEM")
     print(f" Gemini API Status: {'ACTIVE (Model: ' + GEMINI_MODEL + ')' if GENINI_ENABLED else 'INACTIVE (Using Fallback)'}")
-    print(" Open http://localhost:5000 in your browser")
+    print(f" Running on port {port}")
     print("===================================================================")
-    app.run(host="0.0.0.0", debug=True)
+    app.run(host="0.0.0.0", port=port, debug=False)
