@@ -343,4 +343,4 @@ if __name__ == "__main__":
     print(f" Gemini API Status: {'ACTIVE (Model: ' + GEMINI_MODEL + ')' if GENINI_ENABLED else 'INACTIVE (Using Fallback)'}")
     print(" Open http://localhost:5000 in your browser")
     print("===================================================================")
-    app.run(host="127.0.0.1", port=5000, debug=True, threaded=True)
+    app.run(host="0.0.0.0", debug=True)
