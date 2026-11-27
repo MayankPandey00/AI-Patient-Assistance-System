@@ -1,9 +1,19 @@
-pydub==0.25.1
-deep-translator==1.11.4
-cryptography==42.0.8
-mysql-connector-python==8.4.0
-standard-aifc
-audioop-lts
+# pydub==0.25.1
+# deep-translator==1.11.4
+# cryptography==42.0.8
+# mysql-connector-python==8.4.0
+# standard-aifc
+# audioop-lts
+# flask
+# flask-cors
+# gunicorn
+# python-dotenv
+# requests
+# google-genai
+# SpeechRecognition>=3.16.1
+# gTTS
+# cryptography
+
 flask
 flask-cors
 gunicorn
