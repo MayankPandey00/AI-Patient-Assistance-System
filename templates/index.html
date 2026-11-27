@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <title>AI-Based Multilingual Patient Assistance System</title>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="brand-title">
+            <h1>🏥 AI-Based Multilingual Patient Assistance System</h1>
+            <p>Real-Time Speech-to-Text, Medical Translation, gTTS Audio & Encrypted Record Repository</p>
+        </div>
+        <div class="header-controls">
+            <div class="badge-security">🔒 Module 5: Fernet AES-128 Encryption Active</div>
+            <div class="patient-id-box">
+                <span>Patient ID:</span>
+                <input id="patientId" type="text" value="PT-101">
+            </div>
+        </div>
+    </header>
+
+    <!-- Emergency Communication Bar (Objective 6) -->
+    <div class="emergency-bar">
+        <div class="emergency-title">🚨 Emergency Fast-Track Communication (1-Click Real-Time Triage):</div>
+        <div class="emergency-btns">
+            <button class="btn-emergency" onclick="sendEmergency('मेरे सीने में बहुत तेज दर्द हो रहा है और सांस फूल रही है', 'hi', 'PATIENT')">
+                🫀 Severe Chest Pain (Hindi -> Doctor)
+            </button>
+            <button class="btn-emergency" onclick="sendEmergency('मरीज को चक्कर आ रहे हैं और तेज बुखार है', 'hi', 'PATIENT')">
+                🤒 High Fever & Dizziness (Hindi -> Doctor)
+            </button>
+            <button class="btn-emergency doctor" onclick="sendEmergency('Do not panic. We are giving oxygen and performing an ECG immediately.', 'en', 'DOCTOR')">
+                ⚡ Doctor Emergency Instruction (English -> Patient)
+            </button>
+        </div>
+    </div>
+
+    <!-- Status / Error Alert Box -->
+    <div id="alertBox">
+        <span id="alertMessage"></span>
+        <button onclick="document.getElementById('alertBox').style.display='none'" style="background:none;border:none;font-weight:bold;cursor:pointer;font-size:1rem;">&times;</button>
+    </div>
+
+    <!-- Main 3-Column Workspace -->
+    <main>
+
+        <!-- COLUMN 1: PATIENT TERMINAL (Patient -> Doctor) -->
+        <div class="card">
+            <div class="card-header patient">
+                <h2>🗣️ Patient Terminal</h2>
+                <span>Patient &rarr; Doctor</span>
+            </div>
+            <div class="card-body">
+                <div>
+                    <label>Patient Native Language</label>
+                    <select id="patientLang">
+                        <option value="hi" selected>Hindi (हिन्दी)</option>
+                        <option value="bn">Bengali (বাংলা)</option>
+                        <option value="ta">Tamil (தமிழ்)</option>
+                        <option value="te">Telugu (తెలుగు)</option>
+                        <option value="mr">Marathi (मराठी)</option>
+                        <option value="gu">Gujarati (ગુજરાતી)</option>
+                        <option value="pa">Punjabi (ਪੰਜਾਬੀ)</option>
+                        <option value="kn">Kannada (ಕನ್ನಡ)</option>
+                        <option value="ml">Malayalam (മലയാളം)</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+
+                <!-- Module 1: Voice Input -->
+                <div class="mic-box">
+                    <button id="patientMicBtn" class="mic-btn patient" onclick="toggleMicRecording('PATIENT')">🎤</button>
+                    <div id="patientMicStatus" style="font-size:0.8rem; font-weight:600; color:#475569;">
+                        Click Mic to Speak &rarr; Click Again to Translate
+                    </div>
+                    <div class="volume-meter"><div id="patientVolumeBar" class="volume-bar"></div></div>
+                </div>
+
+                <!-- Manual Text Alternative -->
+                <div class="text-input-row">
+                    <input id="patientTextInput" type="text" placeholder="Or type patient symptoms here..." onkeydown="if(event.key==='Enter') sendManualText('PATIENT')">
+                    <button class="btn-send patient" onclick="sendManualText('PATIENT')">Send</button>
+                </div>
+
+                <!-- Module 2: Speech-to-Text Output -->
+                <div class="output-box">
+                    <div class="box-title">
+                        <span>Module 2: Recognized Patient Speech (STT)</span>
+                    </div>
+                    <p id="patientRecognizedText" style="font-weight:400; color:#475569;">Waiting for patient voice or text input...</p>
+                </div>
+
+                <!-- Module 4: Doctor's Translated Response for Patient -->
+                <div class="output-box highlight-patient">
+                    <div class="box-title">
+                        <span style="color:#1d4ed8;">Module 4: Doctor's Instructions (Translated)</span>
+                    </div>
+                    <p id="patientTranslatedOutput" style="color:#1e3a8a;">Doctor's translated diagnosis will appear here...</p>
+                    <audio id="patientAudioPlayer" controls></audio>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMN 2: MEDICAL DATA REPOSITORY (Module 5 & 6 + Context DFD) -->
+        <div class="card">
+            <div class="card-header repository">
+                <h2>🗄️ Medical Data Repository</h2>
+                <span>Context DFD Level-0</span>
+            </div>
+            <div class="card-body">
+                <!-- Staff Authentication for History Retrieval (Module 5) -->
+                <div style="display:flex; gap:6px; align-items:center;">
+                    <input id="staffPinInput" type="password" value="1234" placeholder="Staff PIN (1234)" style="width:120px; font-size:0.8rem;">
+                    <button onclick="fetchEncryptedHistory()" style="flex:1; padding:9px; background:#334155; color:white; border:none; border-radius:8px; font-size:0.8rem; font-weight:600; cursor:pointer;">
+                        🔓 Retrieve Patient History (DB)
+                    </button>
+                </div>
+
+                <div id="conversationFeed">
+                    <div id="emptyFeedText" style="text-align:center; color:#94a3b8; margin-top:60px; font-size:0.85rem;">
+                        No active records in this session.<br><br>Speak using the Microphone, type a message, or click an Emergency button above.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMN 3: DOCTOR / MEDICAL STAFF TERMINAL (Doctor -> Patient) -->
+        <div class="card">
+            <div class="card-header doctor">
+                <h2>👨‍⚕️ Doctor / Staff Terminal</h2>
+                <span>Doctor &rarr; Patient</span>
+            </div>
+            <div class="card-body">
+                <div>
+                    <label>Doctor Working Language</label>
+                    <select id="doctorLang">
+                        <option value="en" selected>English (Medical Standard)</option>
+                        <option value="hi">Hindi (हिन्दी)</option>
+                        <option value="bn">Bengali (বাংলা)</option>
+                        <option value="ta">Tamil (தமிழ்)</option>
+                        <option value="te">Telugu (తెలుగు)</option>
+                        <option value="mr">Marathi (मराठी)</option>
+                    </select>
+                </div>
+
+                <!-- Module 1: Voice Input for Doctor -->
+                <div class="mic-box">
+                    <button id="doctorMicBtn" class="mic-btn doctor" onclick="toggleMicRecording('DOCTOR')">🎤</button>
+                    <div id="doctorMicStatus" style="font-size:0.8rem; font-weight:600; color:#475569;">
+                        Click Mic to Speak &rarr; Click Again to Translate
+                    </div>
+                    <div class="volume-meter"><div id="doctorVolumeBar" class="volume-bar"></div></div>
+                </div>
+
+                <!-- Manual Text Alternative -->
+                <div class="text-input-row">
+                    <input id="doctorTextInput" type="text" placeholder="Or type diagnosis / prescription..." onkeydown="if(event.key==='Enter') sendManualText('DOCTOR')">
+                    <button class="btn-send doctor" onclick="sendManualText('DOCTOR')">Send</button>
+                </div>
+
+                <!-- Module 2: Recognized Doctor Speech -->
+                <div class="output-box">
+                    <div class="box-title">
+                        <span>Module 2: Recognized Doctor Speech (STT)</span>
+                    </div>
+                    <p id="doctorRecognizedText" style="font-weight:400; color:#475569;">Waiting for doctor voice or text input...</p>
+                </div>
+
+                <!-- Module 4: Patient's Translated Symptoms for Doctor -->
+                <div class="output-box highlight-doctor">
+                    <div class="box-title">
+                        <span style="color:#0f766e;">Module 4: Patient's Symptoms (Translated)</span>
+                    </div>
+                    <p id="doctorTranslatedOutput" style="color:#134e4a;">Patient's translated symptoms will appear here...</p>
+                    <audio id="doctorAudioPlayer" controls></audio>
+                </div>
+            </div>
+        </div>
+
+    </main>
+    <script src="{{ url_for('static', filename='script.js') }}"></script> 
+</body>
+</html>

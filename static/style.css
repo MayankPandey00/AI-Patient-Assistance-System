@@ -1,0 +1,253 @@
+:root {
+            --primary: #0f766e;
+            --primary-dark: #115e59;
+            --patient-blue: #1d4ed8;
+            --patient-bg: #eff6ff;
+            --doctor-teal: #0f766e;
+            --doctor-bg: #f0fdfa;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --bg-light: #f8fafc;
+            --border: #cbd5e1;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-light); color: var(--text-dark); display: flex; flex-direction: column; min-height: 100vh; }
+
+        /* Top Header */
+        header {
+            background: linear-gradient(90deg, #0f766e, #0d9488);
+            color: white;
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
+        .brand-title h1 { font-size: 1.25rem; font-weight: 700; }
+        .brand-title p { font-size: 0.78rem; opacity: 0.9; }
+        .header-controls { display: flex; align-items: center; gap: 12px; font-size: 0.85rem; }
+        .badge-security {
+            background: rgba(0,0,0,0.25);
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .patient-id-box {
+            background: rgba(255,255,255,0.15);
+            padding: 5px 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .patient-id-box input {
+            width: 80px;
+            padding: 4px 6px;
+            border-radius: 4px;
+            border: none;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        /* Emergency Bar */
+        .emergency-bar {
+            background: var(--danger-bg);
+            border-bottom: 1px solid #fecaca;
+            padding: 10px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .emergency-title { color: var(--danger); font-weight: 700; font-size: 0.85rem; }
+        .emergency-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+        .btn-emergency {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .btn-emergency:hover { opacity: 0.9; }
+        .btn-emergency.doctor { background: #d97706; }
+
+        /* Alert Banner */
+        #alertBox {
+            display: none;
+            margin: 10px 24px 0;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Main 3-Column Grid (Matches Context DFD & Slide 5) */
+        main {
+            max-width: 1400px;
+            width: 100%;
+            margin: 18px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 20px;
+            flex: 1;
+        }
+
+        .card {
+            background: white;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .card-header {
+            padding: 14px 18px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-header.patient { background: var(--patient-blue); }
+        .card-header.doctor { background: var(--doctor-teal); }
+        .card-header.repository { background: #1e293b; }
+        .card-header h2 { font-size: 1.05rem; }
+        .card-header span { font-size: 0.75rem; background: rgba(0,0,0,0.25); padding: 4px 8px; border-radius: 6px; }
+
+        .card-body { padding: 18px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
+
+        label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 4px; }
+        select, input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        /* Microphone Recorder Section */
+        .mic-box {
+            background: #f8fafc;
+            border: 1px dashed #94a3b8;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+        .mic-btn {
+            width: 74px;
+            height: 74px;
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-size: 1.7rem;
+            cursor: pointer;
+            margin: 0 auto 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: transform 0.15s;
+        }
+        .mic-btn.patient { background: var(--patient-blue); }
+        .mic-btn.doctor { background: var(--doctor-teal); }
+        .mic-btn.recording {
+            background: var(--danger) !important;
+            animation: pulse 1.2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.6); }
+            70% { box-shadow: 0 0 0 14px rgba(220, 38, 38, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+        }
+        .volume-meter {
+            width: 80%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin: 6px auto 0;
+            overflow: hidden;
+        }
+        .volume-bar {
+            height: 100%;
+            width: 0%;
+            background: #10b981;
+            transition: width 0.08s;
+        }
+
+        .text-input-row { display: flex; gap: 8px; }
+        .btn-send {
+            padding: 9px 16px;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-send.patient { background: var(--patient-blue); }
+        .btn-send.doctor { background: var(--doctor-teal); }
+
+        .output-box {
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: #f8fafc;
+        }
+        .output-box.highlight-patient { background: var(--patient-bg); border-color: #bfdbfe; }
+        .output-box.highlight-doctor { background: var(--doctor-bg); border-color: #99f6e4; }
+        .output-box .box-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .output-box p { font-size: 0.95rem; font-weight: 600; min-height: 38px; line-height: 1.4; }
+        audio { width: 100%; height: 34px; margin-top: 8px; }
+
+        /* Repository Log */
+        #conversationFeed {
+            flex: 1;
+            max-height: 460px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-right: 4px;
+        }
+        .log-item {
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            border-left: 4px solid var(--primary);
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            border-right: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .log-item.patient { border-left-color: var(--patient-blue); background: #f8faff; }
+        .log-item.doctor { border-left-color: var(--doctor-teal); background: #f2fbf9; }
+
+        footer {
+            text-align: center;
+            padding: 12px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            background: white;
+            border-top: 1px solid var(--border);
+        }

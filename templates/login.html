@@ -1,0 +1,384 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — AI Patient Assistance System</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body {
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%); padding: 20px; color: #1e293b;
+        }
+        .auth-card {
+            background: #fff; width: 100%; max-width: 430px; border-radius: 16px;
+            padding: 32px 28px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+        }
+        .brand { text-align: center; margin-bottom: 24px; }
+        .brand h1 { font-size: 1.45rem; color: #0f172a; margin-bottom: 6px; }
+        .brand p { font-size: 0.9rem; color: #64748b; }
+        .tabs {
+            display: grid; grid-template-columns: 1fr 1fr; background: #f1f5f9;
+            padding: 4px; border-radius: 10px; margin-bottom: 20px;
+        }
+        .tab-btn {
+            border: none; background: transparent; padding: 10px; font-size: 0.95rem;
+            font-weight: 600; color: #64748b; border-radius: 8px; cursor: pointer;
+        }
+        .tab-btn.active { background: #fff; color: #0f172a; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+        .alert { padding: 10px 14px; border-radius: 8px; font-size: 0.88rem; margin-bottom: 16px; }
+        .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .alert-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .form-section { display: none; }
+        .form-section.active { display: block; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px; }
+        .input-group input {
+            width: 100%; padding: 11px 13px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem;
+        }
+        .input-group input:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+        .method-toggle { display: flex; gap: 10px; margin-bottom: 14px; }
+        .method-pill {
+            flex: 1; padding: 8px; border: 1px solid #cbd5e1; background: #f8fafc;
+            border-radius: 8px; font-size: 0.85rem; font-weight: 600; color: #475569; cursor: pointer;
+        }
+        .method-pill.active { border-color: #2563eb; background: #eff6ff; color: #1d4ed8; }
+        .btn-primary {
+            width: 100%; padding: 12px; background: #2563eb; color: #fff; border: none;
+            border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 4px;
+        }
+        .btn-primary:hover { background: #1d4ed8; }
+        .divider { display: flex; align-items: center; margin: 22px 0 18px; color: #94a3b8; font-size: 0.85rem; }
+        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #e2e8f0; }
+        .divider span { padding: 0 12px; }
+        .btn-guest {
+            width: 100%; padding: 12px; background: #f8fafc; color: #0f172a;
+            border: 1.5px dashed #94a3b8; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer;
+        }
+        .btn-guest:hover { background: #f1f5f9; border-color: #475569; }
+        .guest-note { text-align: center; font-size: 0.8rem; color: #64748b; margin-top: 8px; line-height: 1.4; }
+    </style>
+</head>
+<body>
+    <div class="auth-card">
+        <div class="brand">
+            <h1>AI Patient Assistance</h1>
+            <p>Sign in for full access or continue as a guest</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="tabs">
+            <button type="button" class="tab-btn {{ 'active' if active_tab != 'register' else '' }}" onclick="switchTab('login')">Sign In</button>
+            <button type="button" class="tab-btn {{ 'active' if active_tab == 'register' else '' }}" onclick="switchTab('register')">Create Account</button>
+        </div>
+
+        <form id="login-form" class="form-section {{ 'active' if active_tab != 'register' else '' }}" method="POST" action="{{ url_for('auth.login') }}">
+            <div class="input-group">
+                <label for="identifier">Email Address or Phone Number</label>
+                <input type="text" id="identifier" name="identifier" placeholder="name@example.com or +919876543210" required>
+            </div>
+            <div class="input-group">
+                <label for="login-password">Password</label>
+                <input type="password" id="login-password" name="password" placeholder="Enter your password" required>
+            </div>
+            <button type="submit" class="btn-primary">Sign In</button>
+        </form>
+
+        <form id="register-form" class="form-section {{ 'active' if active_tab == 'register' else '' }}" method="POST" action="{{ url_for('auth.register') }}">
+            <div class="input-group">
+                <label for="full_name">Full Name</label>
+                <input type="text" id="full_name" name="full_name" placeholder="Enter your full name" required>
+            </div>
+
+            <div class="method-toggle">
+                <button type="button" id="pill-email" class="method-pill active" onclick="setRegMethod('email')">Use Email</button>
+                <button type="button" id="pill-phone" class="method-pill" onclick="setRegMethod('phone')">Use Phone No.</button>
+            </div>
+            <input type="hidden" id="reg_method" name="reg_method" value="email">
+
+            <div class="input-group" id="reg-email-group">
+                <label for="reg_email">Email Address</label>
+                <input type="email" id="reg_email" name="email" placeholder="name@example.com" required>
+            </div>
+
+            <div class="input-group" id="reg-phone-group" style="display: none;">
+                <label for="reg_phone">Phone Number</label>
+                <input type="tel" id="reg_phone" name="phone" placeholder="+91 9876543210">
+            </div>
+
+            <div class="input-group">
+                <label for="reg_password">Password</label>
+                <input type="password" id="reg_password" name="password" placeholder="Minimum 6 characters" minlength="6" required>
+            </div>
+            <button type="submit" class="btn-primary">Create Account</button>
+        </form>
+
+        <div class="divider"><span>OR</span></div>
+
+        <form method="POST" action="{{ url_for('auth.guest_login') }}">
+            <button type="submit" class="btn-guest">Continue as Guest (Translator Only)</button>
+        </form>
+        <p class="guest-note">
+            Guest mode allows <strong>Translator only</strong>.<br>
+            Sign in to unlock patient records, history, and all other features.
+        </p>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            document.getElementById('login-form').classList.toggle('active', tab === 'login');
+            document.getElementById('register-form').classList.toggle('active', tab === 'register');
+            const btns = document.querySelectorAll('.tab-btn');
+            btns[0].classList.toggle('active', tab === 'login');
+            btns[1].classList.toggle('active', tab === 'register');
+        }
+
+        function setRegMethod(method) {
+            document.getElementById('reg_method').value = method;
+            const isEmail = method === 'email';
+            document.getElementById('reg-email-group').style.display = isEmail ? 'block' : 'none';
+            document.getElementById('reg-phone-group').style.display = isEmail ? 'none' : 'block';
+            document.getElementById('reg_email').required = isEmail;
+            document.getElementById('reg_phone').required = !isEmail;
+            if (isEmail) document.getElementById('reg_phone').value = '';
+            else document.getElementById('reg_email').value = '';
+            document.getElementById('pill-email').classList.toggle('active', isEmail);
+            document.getElementById('pill-phone').classList.toggle('active', !isEmail);
+        }
+    </script>
+</body>
+</html> -->
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — AI Patient Assistance System</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body {
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+            padding: 20px; color: #1e293b;
+        }
+        .auth-card {
+            background: #ffffff; width: 100%; max-width: 430px; border-radius: 16px;
+            padding: 32px 28px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+        }
+        .brand { text-align: center; margin-bottom: 24px; }
+        .brand h1 { font-size: 1.45rem; color: #0f172a; margin-bottom: 6px; }
+        .brand p { font-size: 0.9rem; color: #64748b; }
+        .alert {
+            padding: 10px 14px; border-radius: 8px; font-size: 0.88rem; margin-bottom: 16px;
+        }
+        .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .alert-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .id-pill {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px;
+            padding: 10px 13px; margin-bottom: 18px; font-size: 0.9rem;
+        }
+        .id-pill strong { color: #0f172a; word-break: break-all; }
+        .id-pill a { color: #2563eb; text-decoration: none; font-weight: 600; margin-left: 10px; white-space: nowrap; }
+        .step-badge {
+            display: inline-block; font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+            padding: 4px 10px; border-radius: 999px; margin-bottom: 12px;
+        }
+        .badge-new { background: #dbeafe; color: #1d4ed8; }
+        .badge-return { background: #dcfce7; color: #166534; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 6px; }
+        .input-group input {
+            width: 100%; padding: 11px 13px; border: 1px solid #cbd5e1;
+            border-radius: 8px; font-size: 0.95rem;
+        }
+        .input-group input:focus {
+            outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+        .btn-primary {
+            width: 100%; padding: 12px; background: #2563eb; color: #ffffff; border: none;
+            border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 4px;
+        }
+        .btn-primary:hover { background: #1d4ed8; }
+        .divider {
+            display: flex; align-items: center; margin: 22px 0 18px;
+            color: #94a3b8; font-size: 0.85rem;
+        }
+        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #e2e8f0; }
+        .divider span { padding: 0 12px; }
+        .btn-guest {
+            width: 100%; padding: 12px; background: #f8fafc; color: #0f172a;
+            border: 1.5px dashed #94a3b8; border-radius: 8px; font-size: 0.95rem;
+            font-weight: 600; cursor: pointer;
+        }
+        .btn-guest:hover { background: #f1f5f9; border-color: #475569; }
+        .guest-note {
+            text-align: center; font-size: 0.8rem; color: #64748b;
+            margin-top: 8px; line-height: 1.4;
+        }
+        .error-inline { color: #dc2626; font-size: 0.82rem; margin-top: 5px; display: none; }
+    </style>
+</head>
+<body>
+    <div class="auth-card">
+        <div class="brand">
+            <h1>AI Patient Assistance</h1>
+            {% if step == 'create_password' %}
+                <p>First time here? Create a password to get started</p>
+            {% elif step == 'enter_password' %}
+                <p>Welcome back{% if existing_name %}, {{ existing_name }}{% endif %}</p>
+            {% else %}
+                <p>Enter your Email ID or Phone Number to continue</p>
+            {% endif %}
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- STEP 1: Enter Email or Phone -->
+        {% if step == 'check' %}
+        <form method="POST" action="{{ url_for('auth.login') }}">
+            <input type="hidden" name="step" value="check">
+
+            <div class="input-group">
+                <label for="identifier">Email ID or Phone Number</label>
+                <input
+                    type="text"
+                    id="identifier"
+                    name="identifier"
+                    value="{{ identifier or '' }}"
+                    placeholder="name@example.com or +919876543210"
+                    required
+                    autofocus
+                >
+            </div>
+
+            <button type="submit" class="btn-primary">Continue</button>
+        </form>
+
+        <div class="divider"><span>OR</span></div>
+
+        <form method="POST" action="{{ url_for('auth.guest_login') }}">
+            <button type="submit" class="btn-guest">Continue as Guest (Translator Only)</button>
+        </form>
+        <p class="guest-note">
+            Guest mode gives access to the <strong>Translator only</strong>.<br>
+            Sign in to unlock patient records, history, and all other features.
+        </p>
+
+        <!-- STEP 2A: First-Time User -> Create Password -->
+        {% elif step == 'create_password' %}
+        <span class="step-badge badge-new">First-Time Setup</span>
+        <div class="id-pill">
+            <strong>{{ identifier }}</strong>
+            <a href="{{ url_for('auth.login') }}">Change</a>
+        </div>
+
+        <form id="create-pw-form" method="POST" action="{{ url_for('auth.login') }}">
+            <input type="hidden" name="step" value="create_password">
+            <input type="hidden" name="identifier" value="{{ identifier }}">
+
+            <div class="input-group">
+                <label for="full_name">Full Name</label>
+                <input
+                    type="text"
+                    id="full_name"
+                    name="full_name"
+                    value="{{ full_name or '' }}"
+                    placeholder="Enter your full name"
+                    required
+                    autofocus
+                >
+            </div>
+
+            <div class="input-group">
+                <label for="new_password">Create Password</label>
+                <input
+                    type="password"
+                    id="new_password"
+                    name="password"
+                    placeholder="Minimum 6 characters"
+                    minlength="6"
+                    required
+                >
+            </div>
+
+            <div class="input-group">
+                <label for="confirm_password">Confirm Password</label>
+                <input
+                    type="password"
+                    id="confirm_password"
+                    name="confirm_password"
+                    placeholder="Re-enter your password"
+                    minlength="6"
+                    required
+                >
+                <div id="pw-mismatch" class="error-inline">Passwords do not match.</div>
+            </div>
+
+            <button type="submit" class="btn-primary">Create Password &amp; Sign In</button>
+        </form>
+
+        <!-- STEP 2B: Returning User -> Enter Password -->
+        {% elif step == 'enter_password' %}
+        <span class="step-badge badge-return">Returning User</span>
+        <div class="id-pill">
+            <strong>{{ identifier }}</strong>
+            <a href="{{ url_for('auth.login') }}">Change</a>
+        </div>
+
+        <form method="POST" action="{{ url_for('auth.login') }}">
+            <input type="hidden" name="step" value="enter_password">
+            <input type="hidden" name="identifier" value="{{ identifier }}">
+
+            <div class="input-group">
+                <label for="login_password">Password</label>
+                <input
+                    type="password"
+                    id="login_password"
+                    name="password"
+                    placeholder="Enter your password"
+                    required
+                    autofocus
+                >
+            </div>
+
+            <button type="submit" class="btn-primary">Sign In</button>
+        </form>
+        {% endif %}
+    </div>
+
+    <script>
+        const createForm = document.getElementById("create-pw-form");
+        if (createForm) {
+            createForm.addEventListener("submit", function (e) {
+                const pw = document.getElementById("new_password").value;
+                const cpw = document.getElementById("confirm_password").value;
+                const msg = document.getElementById("pw-mismatch");
+                if (pw !== cpw) {
+                    e.preventDefault();
+                    msg.style.display = "block";
+                } else {
+                    msg.style.display = "none";
+                }
+            });
+        }
+    </script>
+</body>
+</html>
